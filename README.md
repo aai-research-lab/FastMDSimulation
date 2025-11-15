@@ -3,7 +3,7 @@
 Automated Molecular Dynamics Simulation — with a single command. 
 
 - **Pipeline:** prepare → solvate + ions → minimize → NVT → NPT → production  
-- **Reproducible:** YAML job files **or** one‑shot from PDB with optional overrides  
+- **Reproducible:** Supports both **Systemic** (multiple systems) and **One-Shot** (PDB) Simulations. 
 - **Analysis:** Optional post‑MD analysis via `FastMDAnalysis` (supports auto-generated slide deck)  
 - **HPC‑ready:** Works on CPU, NVIDIA GPUs (CUDA), and clusters with module‑provided CUDA  
 - **MD Engine:** Modern `openmm 8` that defaults to `CHARMM36` forcefile + `TIP3P` water model  
@@ -118,14 +118,14 @@ conda --version
 
 ## Quick Start
 
-### Systemic simulation (Recommended for reproducibility)
-Perform MD simulation of one or more systems with a single command. All systems and simulation parameters are specified in a `.yml` file.
+### Systemic Simulation (Recommended for reproducibility)
+For simulating one or multiple systems with a single command. All systems and simulation parameters are specified in a `.yml` file.
 ```bash
 fastmds simulate -system examples/waterbox/job.yml
 ```
 
-### One‑shot simulation (from PDB)
-Perform MD simulation from raw PDB with optional `.yml` simulation parameter overrides.
+### One‑Shot Simulation
+For quick simulations from a single raw PDB with optional `.yml` simulation parameter overrides.
 ```bash
 fastmds simulate -system examples/trpcage/trpcage.pdb --config examples/config.quick.yml
 ```
@@ -200,7 +200,7 @@ systems:
 ---
 
 ## Simulation Parameters
-### Minimal YAML Reference 
+### Minimal `.yml` Reference 
 
 ```yaml
 project: TrpCage
@@ -235,7 +235,7 @@ systems:
 ```
 
 
-### Comprehensive YAML Reference
+### Comprehensive `.yml` Reference
 
 Everything shown below is **optional** unless noted. Omitted fields fall back to sensible defaults.
 
@@ -310,7 +310,7 @@ systems:
     pdb: examples/trpcage/trpcage.pdb
 
 sweep:
-  temperature_K: [300, 310, 320]
+  temperature_K: [300, 310, 320]         # for each system perform simulations at multiple temperatures
 ```
 
 > **Tip:** When you enable `useSwitchingFunction`, only set `switchDistance_nm` if you also choose a `Cutoff*` nonbonded method. Passing `switchingDistance` with PME/Ewald raises an OpenMM error.
@@ -356,8 +356,8 @@ fastmds simulate -system examples/trpcage/trpcage.pdb --config examples/config.q
 
 ---
 
-## Outputs
-
+## Expected Output
+After running any simulation, you'll get:
 ```
 <output>/<project>/
   fastmds.log                     # project log (plain text; records versions & CLI)
