@@ -428,4 +428,6 @@ Ensure `fastmdanalysis>=1.0.0` is installed. Check fastmds.log for specific erro
 
 ## License
 
-MIT
+`FastMDSimulation` is licensed under the MIT license. 
+
+
