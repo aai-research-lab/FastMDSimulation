@@ -11,12 +11,59 @@ Automated Molecular Dynamics Simulation — with a single command.
 
 ---
 
-## Installation (Conda‑only)
+## Installation
+We recommend installing `FastMDSimulation` using `mamba`. 
+> If you don't have `mamba`, see **Mamba Installation** section below.
+```bash
+git clone https://github.com/aai-research-lab/FastMDSimulation.git
+cd FastMDSimulation
 
-We recommend **Miniforge** (conda‑forge first) and **Mamba**. 
+# Create environment and install
+mamba env create -f environment.yml || conda env create -f environment.yml
+conda activate fastmdsimulation
 
-### 1) Install Miniforge and Mamba
-Grab the installer for your OS from the Miniforge releases page and run it. Then:
+# Optional: Auto-detect and install CUDA support
+./scripts/install_cuda.sh
+```
+
+### Verify Installation
+
+#### Help & Version
+```bash
+fastmds -h
+fastmds simulate -h
+fastmds -v
+```
+#### Available Platforms
+```bash
+python - <<'PY'
+import openmm as mm
+platforms = [mm.Platform.getPlatform(i).getName() for i in range(mm.Platform.getNumPlatforms())]
+print('Available platforms:', platforms)
+if 'CUDA' in platforms:
+    print('CUDA platform available for GPU acceleration')
+else:
+    print('CPU-only installation - simulations will run on CPU')
+PY
+```
+
+#### Platform-Specific Notes
+CPU-Only Systems: Everything works without CUDA installation.
+
+Local NVIDIA GPU: The installer will auto-detect and install CUDA support.
+
+HPC Systems: Skip the CUDA installer and use your system's CUDA modules:
+```bash
+module load cuda/11.8  # Use your system's CUDA version
+conda activate fastmdsimulation
+```
+---
+
+## Mamba Installation 
+If you don't have `mamba`, we recommend installing **Miniforge** with **Mamba**. 
+
+#### Option A) Grab the installer for your OS from the [Miniforge releases page](https://conda-forge.org/miniforge/) and run it. 
+Then: Initialize your shell
 ```bash
 # Initialize your shell (example: zsh on macOS)
 source "$HOME/miniforge3/etc/profile.d/conda.sh"
@@ -31,7 +78,7 @@ If `mamba` isn’t present after installing Miniforge, add it with:
 conda install -n base -c conda-forge mamba
 ```
 
-### [Alternatively] Install Miniforge from the command-line
+#### Option B) [Alternatively] Install Miniforge from the command line.
 #### macOS (Apple Silicon / arm64)
 ```bash
 curl -L -o "$HOME/Miniforge3-MacOSX-arm64.sh" \
@@ -67,72 +114,18 @@ Start-Process -Wait $inst
 mamba --version || true
 conda --version
 ```
-
-### 2) Create the environment
-
-Pick the file that matches your setup:
-
-| Scenario | Use this | Why |
-| --- | --- | --- |
-| Laptop / CPU‑only (macOS/Windows/Linux) | `environment.yml` | No GPU runtime bundled. Portable baseline. |
-| HPC with CUDA via **modules** | `environment.yml` + `module load cuda/<ver>` | Avoids conflicts with cluster CUDA. |
-| Local NVIDIA GPU (no modules) | `environment.gpu.yml` | Bundles `cudatoolkit` so CUDA “just works”. |
-
-```bash
-# CPU or HPC (with CUDA module)
-mamba env create -f environment.yml || conda env create -f environment.yml
-conda activate fastmds
-
-# Local NVIDIA GPU (bundled CUDA)
-mamba env create -f environment.gpu.yml || conda env create -f environment.gpu.yml
-conda activate fastmds
-```
-
-> **HPC note:** If your site provides CUDA via modules, do **not** install `cudatoolkit` in the env. Use e.g. `module load cuda/11.8` in your job script.
-
-### 3) Install FastMDSimulation into the env
-From the project root:
-```bash
-pip install -e .
-```
-
-#### Help & Version
-```bash
-fastmds -h
-fastmds simulate -h
-fastmds -v
-```
-
-### 4) Verify OpenMM sees your platforms
-```bash
-python - <<'PY'
-import openmm as mm
-print('Platforms:', [mm.Platform.getPlatform(i).getName() for i in range(mm.Platform.getNumPlatforms())])
-PY
-# Expect 'CUDA' if a GPU is available (macOS usually shows 'CPU' and sometimes 'OpenCL').
-```
-
-To force a backend in your job YAML:
-```yaml
-defaults:
-  platform: CUDA   # or OpenCL / CPU
-```
-
-At runtime, the engine logs e.g.:
-```
-Platform: CUDA (CudaDeviceIndex=0, CudaPrecision=single)
-```
-
 ---
 
 ## Quick Start
 
-### YAML‑driven (recommended for reproducibility)
+### Systemic simulation (Recommended for reproducibility)
+Perform MD simulation of one or more systems with a single command. All systems and simulation parameters are specified in a `.yml` file.
 ```bash
 fastmds simulate -system examples/waterbox/job.yml
 ```
 
-### One‑shot from PDB (with overrides)
+### One‑shot simulation (from PDB)
+Perform MD simulation from raw PDB with optional `.yml` simulation parameter overrides.
 ```bash
 fastmds simulate -system examples/trpcage/trpcage.pdb --config examples/config.quick.yml
 ```
@@ -148,9 +141,9 @@ Analysis output is streamed line‑by‑line and prefixed with `[fastmda]` in yo
 
 ---
 
-## Accepted Inputs & Behavior
+## Accepted Inputs 
 
-Supply **raw structures** or **parameterized systems** in your YAML. The orchestrator normalizes each entry and the engine dispatches to the right OpenMM loader.
+Supply **raw PDB structures** or **parameterized systems** in a `.yml` file. The orchestrator normalizes each entry and the engine dispatches to the right OpenMM loader.
 
 ### PDB route (auto‑prepared by FastMDSimulation)
 ```yaml
@@ -206,7 +199,8 @@ systems:
 
 ---
 
-## YAML Reference (minimal)
+## Simulation Parameters
+### Minimal YAML Reference 
 
 ```yaml
 project: TrpCage
@@ -240,9 +234,8 @@ systems:
     pdb: examples/trpcage/trpcage.pdb
 ```
 
----
 
-## YAML Reference (full)
+### Comprehensive YAML Reference
 
 Everything shown below is **optional** unless noted. Omitted fields fall back to sensible defaults.
 
