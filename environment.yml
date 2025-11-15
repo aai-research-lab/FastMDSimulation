@@ -13,4 +13,3 @@ dependencies:
   - pip
   - pip:
       - fastmdanalysis>=1.0.0
-      - -e .
