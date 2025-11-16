@@ -1,0 +1,24 @@
+
+project: WaterBox
+defaults:
+  engine: openmm
+  platform: auto
+  temperature_K: 300
+  timestep_fs: 2.0
+  minimize_tolerance_kjmol_per_nm: 10.0
+  minimize_max_iterations: 0
+  report_interval: 1000
+  checkpoint_interval: 10000
+  forcefield: ["charmm36.xml", "charmm36/water.xml"]
+  ionic_strength_molar: 0.00
+  neutralize: false
+  box_padding_nm: 0.0
+stages:
+  - { name: minimize,   steps: 0 }
+  - { name: nvt,        steps: 100000, ensemble: NVT }
+  - { name: npt,        steps: 250000, ensemble: NPT }
+  - { name: production, steps: 500000, ensemble: NPT }
+systems:
+  - id: water2nm
+    fixed_pdb: waterbox/water2nm.pdb
+sweep: { temperature_K: [300] }
