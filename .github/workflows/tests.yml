@@ -35,14 +35,7 @@ jobs:
           --cov-fail-under=25 \
           --junitxml=pytest-results.xml
     
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        file: ./coverage.xml
-        flags: unittests
-        name: codecov-umbrella
-    
-    - name: Upload test results
+    - name: Upload test results and coverage
       uses: actions/upload-artifact@v4
       with:
         name: test-results-${{ matrix.os }}-py${{ matrix.python-version }}
@@ -50,6 +43,26 @@ jobs:
           coverage.xml
           pytest-results.xml
         retention-days: 30
+
+  coverage-upload:
+    needs: test  # Wait for all test jobs to complete
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all coverage artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: coverage-reports/
+          pattern: test-results-*
+          merge-multiple: true
+      
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          file: coverage-reports/**/coverage.xml
+          flags: unittests
+          name: codecov-umbrella
+
 
   lint:
     runs-on: ubuntu-latest
