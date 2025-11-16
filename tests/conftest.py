@@ -87,7 +87,7 @@ def waterbox_job_yaml(tmp_jobdir, water2nm_pdb):
 project: WaterBox
 defaults:
   engine: openmm
-  platform: auto
+  platform: Reference  # Explicitly specify Reference platform for CI compatibility
   temperature_K: 300
   timestep_fs: 2.0
   minimize_tolerance_kjmol_per_nm: 10.0
@@ -122,6 +122,7 @@ def minimal_job_yaml(tmp_jobdir, water2nm_pdb):
 project: MinimalTest
 defaults:
   temperature_K: 300
+  platform: Reference  # Explicitly specify Reference platform for CI compatibility
 stages:
   - {{ name: minimize, steps: 0 }}
 systems:
