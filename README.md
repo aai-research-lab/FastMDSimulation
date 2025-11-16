@@ -120,13 +120,14 @@ conda --version
 ## Quick Start
 
 ### Systemic Simulation (Recommended for reproducibility)
-For simulating one or multiple systems with a single command. All systems and simulation parameters are specified in a `.yml` file.
+For simulating one or multiple systems with a single command. 
+> All systems and simulation parameters are specified in a `.yml` file.
 ```bash
 fastmds simulate -system waterbox2nm.yml
 ```
 
 ### One‑Shot Simulation
-For quick simulations from a single raw PDB with optional `.yml` simulation parameter overrides.
+For simulations from a single raw PDB with optional `.yml` parameter overrides.
 ```bash
 fastmds simulate -system trpcage.pdb --config config_trpcage.yml
 ```
@@ -135,7 +136,7 @@ fastmds simulate -system trpcage.pdb --config config_trpcage.yml
 
 **Analysis flags** (only when `--analyze` is present):
 - `--slides` (default **True**; set `--slides False` to disable slides)
-- `--frames` (e.g., `"0,-1,10"` subsample; `"200"` first 200 frames; FastMDAnalysis format)
+- `--frames` (e.g., `"0,-1,10"` subsample every 10 frames; FastMDAnalysis format)
 - `--atoms` (e.g., `protein`, `"protein and name CA"`)
 
 Analysis output is streamed line‑by‑line and prefixed with `[fastmda]` in your log.
@@ -320,6 +321,7 @@ sweep:
 
 ## Python API
 ### Systemic Simulation
+Simulate a 2nm water box:
 ```python
 from fastmdsimulation import FastMDSimulation
 
@@ -327,7 +329,8 @@ fastmds = FastMDSimulation("waterbox2nm.yml")
 fastmds.simulate()
 ```
 
-### One-Shot Simulation with post-MD analysis + auto-generated slide deck
+### One-Shot Simulation 
+Simulate Trp-cage miniprotein with post-MD analysis + auto-generated slide deck:
 ```python
 from fastmdsimulation import FastMDSimulation
 
