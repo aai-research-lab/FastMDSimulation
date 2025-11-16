@@ -1,11 +1,11 @@
 [run]
-source = src
+source = .
 relative_files = true
 
 [paths]
 source =
-    src
-    */FastMDSimulation/src
+    .
+    */FastMDSimulation/*
 
 [report]
 show_missing = true
