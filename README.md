@@ -490,7 +490,7 @@ Aina, A. (2025) "FastMDSimulation: Software for Automated Molecular Dynamics Sim
 - `OpenMM` for the high-performance molecular dynamics engine
 - `OpenMM ForceFields` for providing CHARMM36 and other force fields
 - `PDBFixer` for structure preparation and repair
-- `MDTraj` (via [FastMDAnalysis](https://github.com/aai-research-lab/FastMDAnalysis)) for trajectory analysis and I/O capabilities
+- `FastMDAnalysis` for automated analysis of MD trajectories
 - `NumPy/SciPy` for efficient numerical computations
 
 ``FastMDSimulation`` also leverages the broader scientific Python ecosystem for visualization, configuration management, and user experience:
