@@ -1,0 +1,53 @@
+{% set name = "fastmdsimulation" %}
+{% set version = "0.1.0" %}
+
+package:
+  name: {{ name|lower }}
+  version: {{ version }}
+
+source:
+  url: https://github.com/aai-research-lab/FastMDSimulation/archive/refs/tags/v{{ version }}.tar.gz
+  # If no tags yet, use a specific commit:
+  # git_url: https://github.com/aai-research-lab/FastMDSimulation
+  # git_rev: main  # or specific commit hash
+
+build:
+  number: 0
+  script: {{ PYTHON }} -m pip install . -vv
+  noarch: python  # Since it's pure Python
+
+requirements:
+  host:
+    - python >=3.10
+    - pip
+  run:
+    - python >=3.10
+    - openmm >=8.0
+    - openmmforcefields >=0.11
+    - pdbfixer >=1.8
+    - mdtraj >=1.9.9
+    - pyyaml >=6.0
+    - rich >=13.0
+    - fastmdanalysis >=1.0.0
+
+test:
+  imports:
+    - fastmdsimulation
+  commands:
+    - fastmds --help
+    - fastmds simulate --help
+
+about:
+  home: https://github.com/aai-research-lab/FastMDSimulation
+  license: MIT
+  license_file: LICENSE
+  summary: Automated Molecular Dynamics Simulation
+  description: |
+    Automated molecular dynamics simulation with support for both 
+    Systemic (multiple systems) and One-Shot (single PDB) Simulations.
+  doc_url: https://github.com/aai-research-lab/FastMDSimulation
+  dev_url: https://github.com/aai-research-lab/FastMDSimulation
+
+extra:
+  recipe-maintainers:
+    - ainaadekunle   # Add yourself here
