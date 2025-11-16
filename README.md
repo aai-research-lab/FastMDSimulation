@@ -319,24 +319,31 @@ sweep:
 ---
 
 ## Python API
+### Systemic Simulation
+```python
+from fastmdsimulation import FastMDSimulation
 
+fastmds = FastMDSimulation("examples/waterbox/job.yml")
+fastmds.simulate()
+```
+
+### One-Shot Simulation with post-MD analysis + auto-generated slide deck
 ```python
 from fastmdsimulation import FastMDSimulation
 
 fastmds = FastMDSimulation(
-    "examples/trpcage/trpcage.pdb",
+    system="examples/trpcage/trpcage.pdb",
     output="simulate_output",             # optional
     config="examples/config.quick.yml"    # optional overrides when using a PDB
 )
-project_dir = fastmds.simulate(
+fastmds.simulate(
     analyze=True,                         # optional
     atoms="protein",                      # optional
     slides=True                           # optional (default True)
 )
-print("Outputs in:", project_dir)
 ```
 
-- If `system` ends with `.yml/.yaml`, the YAML is executed; `config` is ignored.
+- If `system` ends with `.yml/.yaml`, Systemic Simulation executed; `config` is ignored.
 - If `system` is a `.pdb`, PDBFixer runs (strict), then a temporary `job.auto.yml` is generated and executed.
 
 ---
@@ -412,22 +419,88 @@ After running any simulation, you'll get:
 
 - **Environment creation fails**
   If `mamba` fails, it will automatically fall back to conda. For persistent issues:
-```bash
-# Remove existing environment and retry
-conda env remove -n fastmdsimulation
-mamba env create -f environment.yml
-```
+  ```bash
+  # Remove existing environment and retry
+  conda env remove -n fastmdsimulation
+  mamba env create -f environment.yml
+  ```
 - **Package not found after installation**
-Ensure you've activated the environment: `conda activate fastmdsimulation` and installed in development mode: `pip install .`
+  Ensure you've activated the environment: `conda activate fastmdsimulation` and installed in development mode: `pip install .`
 
 - **Analysis fails**
-Ensure `fastmdanalysis>=1.0.0` is installed. Check fastmds.log for specific error messages.
+  Ensure `fastmdanalysis>=1.0.0` is installed. Check fastmds.log for specific error messages.
 
+---
+
+## Contributing
+Contributions are welcome. Please submit a Pull Request.
+
+**Development Installation**
+
+If you want to contribute or modify the code:
+```bash
+# Clone the repository
+git clone https://github.com/aai-research-lab/FastMDSimulation.git
+cd FastMDSimulation
+
+# Create and activate conda environment
+mamba env create -f environment.yml
+conda activate fastmdsimulation
+
+# Install in development mode
+pip install -e .
+
+# Verify installation
+fastmds -h
+fastmds simulate -h
+
+# Run tests (when available)
+python -m pytest tests/ -v
+```
+
+---
+
+## Citation
+If you use `FastMDSimulation` in your work, please cite:
+
+Aina, A. (2025) "FastMDSimulation: Software for Automated Molecular Dynamics Simulation". GitHub. https://github.com/aai-research-lab/FastMDSimulation
+
+```bibtex
+@software{fastmdsimulation,
+  author       = {Adekunle Aina},
+  title        = {{FastMDSimulation: Software for Automated Molecular Dynamics Simulation}},
+  year         = {2025},
+  publisher    = {GitHub},
+  url          = {https://github.com/aai-research-lab/FastMDSimulation},
+  note         = {Version 0.1.0}
+}
+```
 
 ---
 
 ## License
+``FastMDSimulation`` is licensed under the MIT license. 
 
-`FastMDSimulation` is licensed under the MIT license. 
+---
+
+## Acknowledgements
+
+``FastMDSimulation`` builds upon excellent open-source libraries to provide its automated molecular dynamics capabilities and to improve workflow efficiency, usability, and reproducibility in MD simulations. We gratefully acknowledge:
+
+- `OpenMM` for the high-performance molecular dynamics engine
+- `OpenMM ForceFields` for providing CHARMM36 and other force fields
+- `PDBFixer` for structure preparation and repair
+- `MDTraj` (via [FastMDAnalysis](https://github.com/aai-research-lab/FastMDAnalysis)) for trajectory analysis and I/O capabilities
+- `NumPy/SciPy` for efficient numerical computations
+
+``FastMDSimulation`` also leverages the broader scientific Python ecosystem for visualization, configuration management, and user experience:
+
+- **PyYAML** for flexible configuration management
+- **Rich** for enhanced console output and logging
+- **Matplotlib** (via [FastMDAnalysis](https://github.com/aai-research-lab/FastMDAnalysis)) for publication-quality figures
+
+While building upon these robust tools, ``FastMDSimulation`` simplifies MD setup and execution for students, professionals, and researchers, especially those new to molecular dynamics. We thank the scientific Python community for their contributions to the ecosystem that make projects like this possible.
+
+
 
 
