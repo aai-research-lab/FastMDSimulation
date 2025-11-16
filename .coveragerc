@@ -5,7 +5,7 @@ relative_files = true
 [paths]
 source =
     .
-    */FastMDSimulation/*
+    */FastMDSimulation
 
 [report]
 show_missing = true
