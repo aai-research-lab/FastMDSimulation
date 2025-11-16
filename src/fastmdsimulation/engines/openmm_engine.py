@@ -94,8 +94,7 @@ def _constraints_from_str(name: Any):
 
 # ---- NEW: map YAML -> createSystem kwargs (with units) ----
 def _map_nonbonded_method(s: str):
-    from openmm.app import (PME, CutoffNonPeriodic, CutoffPeriodic, Ewald,
-                            NoCutoff)
+    from openmm.app import PME, CutoffNonPeriodic, CutoffPeriodic, Ewald, NoCutoff
 
     m = str(s).strip().lower()
     return {
@@ -166,8 +165,7 @@ def create_system(
     """
     import re
 
-    from openmm.app import (AmberPrmtopFile, CharmmPsfFile, ForceField,
-                            GromacsTopFile)
+    from openmm.app import AmberPrmtopFile, CharmmPsfFile, ForceField, GromacsTopFile
 
     if kwargs is None:
         kwargs = {}
@@ -295,9 +293,14 @@ def _make_integrator(defaults: Dict[str, Any]):
         error_tolerance: 0.001   # only used by variable_* integrators
     """
     from openmm import LangevinMiddleIntegrator  # NEW
-    from openmm import (BrownianIntegrator, LangevinIntegrator,
-                        VariableLangevinIntegrator, VariableVerletIntegrator,
-                        VerletIntegrator, unit)
+    from openmm import (
+        BrownianIntegrator,
+        LangevinIntegrator,
+        VariableLangevinIntegrator,
+        VariableVerletIntegrator,
+        VerletIntegrator,
+        unit,
+    )
 
     integ_spec = defaults.get("integrator", "langevin")
     if isinstance(integ_spec, str):
@@ -497,8 +500,7 @@ def _build_from_gromacs(spec: Dict[str, Any], defaults: Dict[str, Any], run_dir:
 
 
 def _build_from_charmm(spec: Dict[str, Any], defaults: Dict[str, Any], run_dir: Path):
-    from openmm.app import (CharmmCrdFile, CharmmParameterSet, CharmmPsfFile,
-                            PDBFile)
+    from openmm.app import CharmmCrdFile, CharmmParameterSet, CharmmPsfFile, PDBFile
 
     psf = CharmmPsfFile(str(spec["psf"]))
 
@@ -590,8 +592,7 @@ def build_simulation_from_spec(
 # ------------------------------------------------------------
 def run_stage(sim, stage: Dict[str, Any], stage_dir: Path, defaults: Dict[str, Any]):
     from openmm import unit
-    from openmm.app import (CheckpointReporter, DCDReporter, PDBFile,
-                            StateDataReporter)
+    from openmm.app import CheckpointReporter, DCDReporter, PDBFile, StateDataReporter
 
     name = stage.get("name", "stage")
     steps = int(stage.get("steps", 0))
