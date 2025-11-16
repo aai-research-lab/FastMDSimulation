@@ -399,7 +399,7 @@ After running any simulation, you'll get:
 
 ## Troubleshooting
 
-- **No CUDA in `Platforms:` list**  
+- **No CUDA in `Platforms` list**  
   - **Local workstations**: Run `./scripts/install_cuda.sh` after creating the environment to auto-detect and install CUDA support.
   - **HPC/Cluster systems**: Use your system's CUDA modules (e.g., `module load cuda/11.8`) instead of the CUDA installer script.
   - **CPU-only systems**: Simulations will run on CPU - no action needed.
@@ -423,20 +423,20 @@ After running any simulation, you'll get:
   The fixer is strict by design. Inspect the error in `fastmds.log`, repair upstream, or provide a vetted `fixed_pdb:` path.
 
 - **Different log look**  
-  FastMDSimulation uses a compact, icon‑and‑color console style (or `plain` if you set `defaults.log_style: plain` or `FASTMDS_LOG_STYLE=plain`).  
+  `FastMDSimulation` uses a compact, icon‑and‑color console style (or `plain` if you set `defaults.log_style: plain` or `FASTMDS_LOG_STYLE=plain`).
   Project logs (`fastmds.log`) are always plain ISO timestamps.
 
-- **Environment creation fails**
+- **Environment creation fails**  
   If `mamba` fails, it will automatically fall back to conda. For persistent issues:
   ```bash
   # Remove existing environment and retry
   conda env remove -n fastmdsimulation
   mamba env create -f environment.yml
   ```
-- **Package not found after installation**
-  Ensure you've activated the environment: `conda activate fastmdsimulation` and installed in development mode: `pip install .`
+- **Package not found after installation**  
+  Ensure you've activated the environment: `conda activate fastmdsimulation` and install `FastMDSimulation`: `pip install .`
 
-- **Analysis fails**
+- **Analysis fails**  
   Ensure `fastmdanalysis>=1.0.0` is installed. Check fastmds.log for specific error messages.
 
 ---
@@ -497,7 +497,7 @@ Aina, A. (2025) "FastMDSimulation: Software for Automated Molecular Dynamics Sim
 ``FastMDSimulation`` builds upon excellent open-source libraries to provide its automated molecular dynamics capabilities and to improve workflow efficiency, usability, and reproducibility in MD simulations. We gratefully acknowledge:
 
 - `OpenMM` for the high-performance molecular dynamics engine
-- `Openmmforcefields` for providing CHARMM36 and other force fields
+- `openmmforcefields` for providing CHARMM36 and other force fields
 - `PDBFixer` for structure preparation and repair
 - `FastMDAnalysis` for automated analysis of MD trajectories
 - `NumPy/SciPy` for efficient numerical computations
