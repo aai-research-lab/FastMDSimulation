@@ -1,0 +1,26 @@
+# examples/config_trpcage.yml
+
+project: TrpCage
+
+defaults:
+  engine: openmm
+  platform: CPU
+  temperature_K: 300
+  timestep_fs: 2.0
+  constraints: HBonds
+  report_interval: 100
+  checkpoint_interval: 500
+  ions: NaCl
+  # minimize_tolerance_kjmol_per_nm: 10.0   # optional (default=10.0)
+  # log_style: pretty                       # optional: pretty | plain
+
+stages:
+  - { name: minimize,   steps: 0 }
+  - { name: nvt,        steps: 5000,  ensemble: NVT }
+  - { name: npt,        steps: 5000,  ensemble: NPT }
+  - { name: production, steps: 10000, ensemble: NPT }
+
+systems:
+  - id: trpcage
+    pdb: trpcage/trpcage.pdb
+    

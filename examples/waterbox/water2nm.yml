@@ -7,8 +7,8 @@ defaults:
   timestep_fs: 2.0
   minimize_tolerance_kjmol_per_nm: 10.0
   minimize_max_iterations: 0
-  report_interval: 1000
-  checkpoint_interval: 10000
+  report_interval: 100
+  checkpoint_interval: 5000
   forcefield: ["charmm36.xml", "charmm36/water.xml"]
   ionic_strength_molar: 0.00
   neutralize: false
