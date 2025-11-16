@@ -1,10 +1,11 @@
 # tests/test_cli.py
 
-import sys
 import json
 import pathlib as pl
+import sys
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
 
 # We need to patch BEFORE importing the CLI module
 with (

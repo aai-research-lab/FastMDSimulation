@@ -1,9 +1,12 @@
 # FastMDSimulation/src/fastmdsimulation/core/simulate.py
 
 from __future__ import annotations
+
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Any, Dict, Optional
+
 import yaml
+
 from ..utils.logging import get_logger
 from .pdbfix import fix_pdb_with_pdbfixer  # <-- moved here
 

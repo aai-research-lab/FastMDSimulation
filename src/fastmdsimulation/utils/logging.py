@@ -1,8 +1,10 @@
 # FastMDSimulation/src/fastmdanalysis/utils/logging.py
 
-import logging, sys, os
-from pathlib import Path
+import logging
+import os
+import sys
 from datetime import datetime
+from pathlib import Path
 
 # --- Colors & icons for pretty console output ---
 _COLOR = {

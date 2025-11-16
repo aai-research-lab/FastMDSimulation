@@ -1,7 +1,9 @@
 # FastMDSimulation/src/fastmdsimulation/core/pdbfix.py
 
 from __future__ import annotations
+
 from pathlib import Path
+
 from ..utils.logging import get_logger
 
 logger = get_logger("pdbfix")
@@ -13,8 +15,8 @@ def fix_pdb_with_pdbfixer(input_pdb: str, output_pdb: str, *, ph: float = 7.0) -
     - Removes heterogens (keeps no waters), finds/adds missing residues/atoms,
       adds hydrogens at the requested pH.
     """
-    from pdbfixer import PDBFixer
     from openmm.app import PDBFile
+    from pdbfixer import PDBFixer
 
     inp = Path(input_pdb)
     out = Path(output_pdb)

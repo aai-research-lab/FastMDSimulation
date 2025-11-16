@@ -1,10 +1,12 @@
 # FastMDSimulation/src/fastmdsimulation/engines/openmm_engine.py
 
 from __future__ import annotations
-from pathlib import Path
-from typing import Dict, Any, Tuple, List
-from ..utils.logging import get_logger
+
 import json
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+from ..utils.logging import get_logger
 
 logger = get_logger("engine.openmm")
 
@@ -42,7 +44,7 @@ def _select_platform(name: str):
 def _maybe_barostat(
     system, ensemble: str, temperature_K: float, pressure_atm: float = 1.0
 ):
-    from openmm import unit, MonteCarloBarostat
+    from openmm import MonteCarloBarostat, unit
 
     if ensemble and ensemble.upper() == "NPT":
         system.addForce(
@@ -73,7 +75,7 @@ def _get_minimize_tolerance(defaults: Dict[str, Any]):
 
 
 def _constraints_from_str(name: Any):
-    from openmm.app import HBonds, AllBonds, HAngles
+    from openmm.app import AllBonds, HAngles, HBonds
 
     if name is None:
         return None
@@ -92,7 +94,8 @@ def _constraints_from_str(name: Any):
 
 # ---- NEW: map YAML -> createSystem kwargs (with units) ----
 def _map_nonbonded_method(s: str):
-    from openmm.app import NoCutoff, CutoffNonPeriodic, CutoffPeriodic, PME, Ewald
+    from openmm.app import (PME, CutoffNonPeriodic, CutoffPeriodic, Ewald,
+                            NoCutoff)
 
     m = str(s).strip().lower()
     return {
@@ -161,8 +164,10 @@ def create_system(
       - GromacsTopFile
       - CharmmPsfFile (requires 'paramset')
     """
-    from openmm.app import ForceField, AmberPrmtopFile, GromacsTopFile, CharmmPsfFile
     import re
+
+    from openmm.app import (AmberPrmtopFile, CharmmPsfFile, ForceField,
+                            GromacsTopFile)
 
     if kwargs is None:
         kwargs = {}
@@ -289,15 +294,10 @@ def _make_integrator(defaults: Dict[str, Any]):
         temperature_K: 300
         error_tolerance: 0.001   # only used by variable_* integrators
     """
-    from openmm import (
-        unit,
-        LangevinIntegrator,
-        BrownianIntegrator,
-        VerletIntegrator,
-        VariableLangevinIntegrator,
-        VariableVerletIntegrator,
-        LangevinMiddleIntegrator,  # NEW
-    )
+    from openmm import LangevinMiddleIntegrator  # NEW
+    from openmm import (BrownianIntegrator, LangevinIntegrator,
+                        VariableLangevinIntegrator, VariableVerletIntegrator,
+                        VerletIntegrator, unit)
 
     integ_spec = defaults.get("integrator", "langevin")
     if isinstance(integ_spec, str):
@@ -352,8 +352,8 @@ def _make_integrator(defaults: Dict[str, Any]):
 # PDB route (solvate, ions, FF)
 # ------------------------------------------------------------
 def _build_simulation(pdb_path: Path, defaults: Dict[str, Any], run_dir: Path):
-    from openmm.app import PDBFile, Modeller
     from openmm import unit
+    from openmm.app import Modeller, PDBFile
 
     ff_files = defaults.get("forcefield", ["charmm36.xml", "charmm36/water.xml"])
     platform_name = defaults.get("platform", "auto")
@@ -408,7 +408,7 @@ def _build_simulation(pdb_path: Path, defaults: Dict[str, Any], run_dir: Path):
 # AMBER / GROMACS / CHARMM routes (parameterized)
 # ------------------------------------------------------------
 def _build_from_amber(spec: Dict[str, Any], defaults: Dict[str, Any], run_dir: Path):
-    from openmm.app import AmberPrmtopFile, AmberInpcrdFile
+    from openmm.app import AmberInpcrdFile, AmberPrmtopFile
 
     prmtop = AmberPrmtopFile(str(spec["prmtop"]))
     crd_key = "inpcrd" if "inpcrd" in spec else "rst7"
@@ -447,7 +447,7 @@ def _build_from_amber(spec: Dict[str, Any], defaults: Dict[str, Any], run_dir: P
 
 
 def _build_from_gromacs(spec: Dict[str, Any], defaults: Dict[str, Any], run_dir: Path):
-    from openmm.app import GromacsTopFile, GromacsGroFile
+    from openmm.app import GromacsGroFile, GromacsTopFile
 
     if "gro" not in spec:
         raise ValueError("GROMACS spec requires 'gro'.")
@@ -497,7 +497,8 @@ def _build_from_gromacs(spec: Dict[str, Any], defaults: Dict[str, Any], run_dir:
 
 
 def _build_from_charmm(spec: Dict[str, Any], defaults: Dict[str, Any], run_dir: Path):
-    from openmm.app import CharmmPsfFile, CharmmCrdFile, PDBFile, CharmmParameterSet
+    from openmm.app import (CharmmCrdFile, CharmmParameterSet, CharmmPsfFile,
+                            PDBFile)
 
     psf = CharmmPsfFile(str(spec["psf"]))
 
@@ -588,8 +589,9 @@ def build_simulation_from_spec(
 # Stage runner
 # ------------------------------------------------------------
 def run_stage(sim, stage: Dict[str, Any], stage_dir: Path, defaults: Dict[str, Any]):
-    from openmm.app import DCDReporter, StateDataReporter, CheckpointReporter, PDBFile
     from openmm import unit
+    from openmm.app import (CheckpointReporter, DCDReporter, PDBFile,
+                            StateDataReporter)
 
     name = stage.get("name", "stage")
     steps = int(stage.get("steps", 0))

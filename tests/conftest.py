@@ -1,10 +1,11 @@
 # tests/conftest.py
 
+import json
 import os
+import pathlib as _pl
 import sys
 import textwrap
-import json
-import pathlib as _pl
+
 import pytest
 
 
@@ -51,8 +52,8 @@ def water2nm_pdb(tmp_jobdir):
     """
     pdb = tmp_jobdir / "water2nm.pdb"
     try:
-        from openmm.app import Modeller, Topology, ForceField, PDBFile
-        from openmm import unit, Vec3
+        from openmm import Vec3, unit
+        from openmm.app import ForceField, Modeller, PDBFile, Topology
 
         # Create a small water box using OpenMM
         mod = Modeller(Topology(), [])

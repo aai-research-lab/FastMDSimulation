@@ -6,7 +6,7 @@ from .api import FastMDSimulation
 
 # Expose package version (doesn't crash if metadata is unavailable, e.g., editable installs)
 try:
-    from importlib.metadata import version, PackageNotFoundError  # Python 3.8+
+    from importlib.metadata import PackageNotFoundError, version  # Python 3.8+
 
     try:
         __version__ = version("fastmdsimulation")

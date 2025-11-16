@@ -1,8 +1,9 @@
 # tests/test_core.py
 
+import pathlib as pl
 import re
 import textwrap
-import pathlib as pl
+
 import pytest
 import yaml
 

@@ -1,8 +1,11 @@
 # FastMDSimulation/src/fastmdsimulation/reporting/analysis_bridge.py
 
+import importlib.util
+import subprocess
+import sys
 from pathlib import Path
-import subprocess, importlib.util, sys
 from typing import Optional
+
 from ..utils.logging import get_logger
 
 

@@ -1,11 +1,15 @@
 # FastMDSimulation/src/fastmdsimulation/cli.py
 
-import argparse, yaml, os
+import argparse
+import os
 from pathlib import Path
-from .utils.logging import setup_console, attach_file_logger
-from .core.orchestrator import run_from_yaml, resolve_plan
-from .core.simulate import simulate_from_pdb, build_auto_config
+
+import yaml
+
+from .core.orchestrator import resolve_plan, run_from_yaml
+from .core.simulate import build_auto_config, simulate_from_pdb
 from .reporting.analysis_bridge import analyze_with_bridge, build_analyze_cmd
+from .utils.logging import attach_file_logger, setup_console
 
 
 # ---------------------------
