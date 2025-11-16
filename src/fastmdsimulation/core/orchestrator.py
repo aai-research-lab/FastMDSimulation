@@ -124,7 +124,7 @@ def _prepare_systems(cfg: Dict[str, Any], base: Path) -> Dict[str, Any]:
       Annotate each with 'type'.
     """
     build_dir = base / "_build"
-    build_dir.mkdir(exist_ok=True)
+    build_dir.mkdir(parents=True, exist_ok=True)
 
     defaults = cfg.get("defaults", {}) or {}
     default_ph = float(defaults.get("ph", 7.0))
@@ -240,6 +240,7 @@ def _maybe_copy_forcefields(defaults: Dict[str, Any], inputs_dir: Path) -> None:
     if not isinstance(ffs, (list, tuple)):
         ffs = [ffs]
     ff_dir = inputs_dir / "forcefields"
+    ff_dir.mkdir(parents=True, exist_ok=True)
     for ff in ffs:
         try:
             p = Path(str(ff))
@@ -293,7 +294,7 @@ def _collect_system_paths(sys_cfg: Dict[str, Any]) -> List[Path]:
 
 def _populate_inputs(cfg: Dict[str, Any], cfg_path: Path, base: Path) -> None:
     inputs_dir = base / "inputs"
-    inputs_dir.mkdir(exist_ok=True)
+    inputs_dir.mkdir(parents=True, exist_ok=True)
     _copy_into(inputs_dir, cfg_path)
     for sys_cfg in cfg.get("systems", []):
         sid = sys_cfg.get("id", "system")
