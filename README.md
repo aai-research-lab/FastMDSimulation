@@ -122,13 +122,13 @@ conda --version
 ### Systemic Simulation (Recommended for reproducibility)
 For simulating one or multiple systems with a single command. All systems and simulation parameters are specified in a `.yml` file.
 ```bash
-fastmds simulate -system examples/waterbox/job.yml
+fastmds simulate -system waterbox2nm.yml
 ```
 
 ### One‑Shot Simulation
 For quick simulations from a single raw PDB with optional `.yml` simulation parameter overrides.
 ```bash
-fastmds simulate -system examples/trpcage/trpcage.pdb --config examples/config.quick.yml
+fastmds simulate -system trpcage.pdb --config config_trpcage.yml
 ```
 
 > You can always add an explicit output directory with `-o <dir>` and analysis flags like `--analyze`, `--atoms`, `--frames`, `--slides` as needed.
@@ -232,7 +232,7 @@ stages:
 
 systems:
   - id: trpcage
-    pdb: examples/trpcage/trpcage.pdb
+    pdb: trpcage.pdb
 ```
 
 
@@ -305,10 +305,10 @@ stages:
 
 systems:
   - id: trpcage1
-    pdb: examples/trpcage/trpcage.pdb    # raw PDB → PDBFixer (strict) → _build/trpcage2_fixed.pdb
+    pdb: trpcage.pdb                     # raw PDB → PDBFixer (strict) → _build/trpcage2_fixed.pdb
     # fixed_pdb: path/to/already_fixed.pdb  # use this to skip PDBFixer
   - id: trpcage2
-    pdb: examples/trpcage/trpcage.pdb
+    pdb: trpcage.pdb
 
 sweep:
   temperature_K: [300, 310, 320]         # for each system perform simulations at multiple temperatures
@@ -323,7 +323,7 @@ sweep:
 ```python
 from fastmdsimulation import FastMDSimulation
 
-fastmds = FastMDSimulation("examples/waterbox/job.yml")
+fastmds = FastMDSimulation("waterbox2nm.yml")
 fastmds.simulate()
 ```
 
@@ -332,9 +332,9 @@ fastmds.simulate()
 from fastmdsimulation import FastMDSimulation
 
 fastmds = FastMDSimulation(
-    system="examples/trpcage/trpcage.pdb",
+    system="trpcage.pdb",
     output="simulate_output",             # optional
-    config="examples/config.quick.yml"    # optional overrides when using a PDB
+    config="config_trpcage.yml"    # optional overrides when using a PDB
 )
 fastmds.simulate(
     analyze=True,                         # optional
@@ -357,7 +357,7 @@ Print stages, approximate ps, output dirs, and the exact `fastmda analyze` comma
 fastmds simulate -system job.yml --analyze --dry-run
 
 # PDB
-fastmds simulate -system examples/trpcage/trpcage.pdb --config examples/config.quick.yml --analyze --dry-run
+fastmds simulate -system protein.pdb --config config.yml --analyze --dry-run
 ```
 
 > You can add `-o <output-dir>`, `--atoms`, `--frames`, or `--slides` to both commands as needed.
