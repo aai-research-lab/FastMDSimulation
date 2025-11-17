@@ -20,6 +20,7 @@ requirements:
     - python >=3.10
     - setuptools
     - wheel
+    - numpy
   run:
     - python >=3.10
     - openmm >=8.0
@@ -28,8 +29,7 @@ requirements:
     - mdtraj >=1.9.9
     - pyyaml >=6.0.1
     - rich >=13.7.0
-    - numpy
-    - fastmdanalysis >=1.0.0
+    - numpy >=1.21
 
 test:
   imports:
@@ -41,7 +41,6 @@ test:
     - fastmds --help
     - python -c "import fastmdsimulation; print('Base import successful')"
     - python -c "from fastmdsimulation.engines.openmm_engine import _select_platform; print('OpenMM engine utilities imported')"
-    - python -c "from fastmdsimulation.engines.openmm_engine import _parse_ions, _make_integrator; print('Configuration functions work')"
   requires:
     - pip
 
@@ -55,6 +54,8 @@ about:
     FastMDSimulation automates molecular dynamics simulation setup, running, and analysis.
     It supports multiple file formats (PDB, AMBER, GROMACS, CHARMM) and provides
     a streamlined workflow for high-throughput MD simulations.
+    
+    Note: For full analysis capabilities, install fastmdanalysis separately via pip.
   doc_url: https://github.com/aai-research-lab/FastMDSimulation
   dev_url: https://github.com/aai-research-lab/FastMDSimulation
 

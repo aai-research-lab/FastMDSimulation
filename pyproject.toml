@@ -12,9 +12,9 @@ license = { text = "MIT" }
 authors = [{ name = "Adekunle Aina" }]
 dependencies = [
     "PyYAML>=6.0.1",
-    "rich>=13.7.0",
-    "fastmdanalysis>=1.0.0"
+    "rich>=13.7.0"
     # Note: OpenMM, MDTraj, etc. are installed via conda/mamba
+    # fastmdanalysis moved to optional dependencies below
 ]
 
 [project.optional-dependencies]
@@ -24,6 +24,9 @@ tests = [
     "black>=23.0",
     "flake8>=6.0",
     "isort>=5.12"
+]
+analysis = [
+    "fastmdanalysis>=1.0.0"
 ]
 
 [project.scripts]
