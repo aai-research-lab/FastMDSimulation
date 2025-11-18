@@ -10,37 +10,9 @@ project: "TrpCage"
 
 systems:
   # ---- PDB route (default): we will PDBFix with the given pH, solvate, add ions, then parameterize with the forcefield ----
-  - id: "trpcage2"
-    pdb: "trpcage/trpcage.pdb"              # raw PDB -> will be fixed automatically
+  - id: "trpcage"
+    pdb: "trpcage.pdb"              # raw PDB -> will be fixed automatically
     # fixed_pdb: "path/to/already_fixed.pdb"  # OPTIONAL: if provided, fixer is skipped for this system
-    # Optional per-system FF override (else defaults.forcefield is used)
-    # forcefield: ["charmm36.xml", "charmm36/water.xml"]
-
-  # ---- AMBER route (parameterized) ----
-  # - id: "amberSys"
-  #   prmtop: "path/to/system.prmtop"
-  #   inpcrd: "path/to/system.inpcrd"        # or rst7: "path/to/system.rst7"
-
-  # ---- GROMACS route (parameterized) ----
-  # - id: "gmxSys"
-  #   top: "path/to/system.top"
-  #   gro: "path/to/system.gro"
-  #   # Optional: include additional .itp files or directories they live in
-  #   # itp: ["path/include1/ions.itp", "path/include2/posre.itp"]
-  #   # include_dirs: ["path/include1", "path/include2"]
-
-  # ---- CHARMM route (parameterized) ----
-  # - id: "charmmSys"
-  #   psf: "path/to/system.psf"
-  #   # Coordinates (one of):
-  #   # crd: "path/to/system.crd"
-  #   # pdb: "path/to/system_coords.pdb"
-  #   # Parameters (any of these; lists allowed)
-  #   params: ["toppar/par_all36m_prot.prm", "toppar/top_all36_prot.rtf", "toppar/water_model.str"]
-  #   # or:
-  #   # prm: ["par_all36m_prot.prm"]
-  #   # rtf: ["top_all36_prot.rtf"]
-  #   # str: ["water_model.str"]
 
 # ----------------------------
 # Global defaults (apply to all runs unless overridden)
