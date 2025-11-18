@@ -20,7 +20,7 @@ stages:
   
 systems:
   - id: water2nm
-    fixed_pdb: waterbox/water2nm.pdb
+    fixed_pdb: water2nm.pdb
     
 sweep: { temperature_K: [300] }
 
