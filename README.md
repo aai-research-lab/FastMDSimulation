@@ -22,26 +22,37 @@ We recommend installing `FastMDSimulation` using `mamba`.
 > If you don't have `mamba`, see **Mamba Installation** section below.
 ```bash
 git clone https://github.com/aai-research-lab/FastMDSimulation.git
+```
+```bash
 cd FastMDSimulation
+```
 
-# Create environment and install
+#### Create environment and install
+```bash
 mamba env create -f environment.yml || conda env create -f environment.yml
+```
+```bash
 conda activate fastmdsimulation
+```
+```bash
 pip install .
+```
 
-# Optional: Auto-detect and install CUDA support
+#### [Optional] Auto-detect and install NVIDIA GPU CUDA support
+```bash
 ./scripts/install_cuda.sh
 ```
 
 ### Verify Installation
 
-#### Help & Version
+#### Get help 
 ```bash
 fastmds -h
-fastmds simulate -h
-fastmds -v
 ```
-#### Available Platforms
+```bash
+fastmds simulate -h
+```
+#### Check available platforms
 ```bash
 python - <<'PY'
 import openmm as mm
@@ -62,30 +73,31 @@ Local NVIDIA GPU: The installer will auto-detect and install CUDA support.
 HPC Systems: Skip the CUDA installer and use your system's CUDA modules:
 ```bash
 module load cuda/11.8  # Use your system's CUDA version
+```
+```bash
 conda activate fastmdsimulation
 ```
 ---
 
 ## Mamba Installation 
-If you don't have `mamba`, we recommend installing **Miniforge** with **Mamba**. 
+If you don't have `mamba`, we recommend installing **Miniforge**. Please see **options A or B** below.
 
-#### Option A) Grab the installer for your OS from the [Miniforge releases page](https://conda-forge.org/miniforge/) and run it. 
-Then: Initialize your shell
+After installing **Miniforge**, initialize your shell
 ```bash
-# Initialize your shell (example: zsh on macOS)
 source "$HOME/miniforge3/etc/profile.d/conda.sh"
 conda init "$(basename "$SHELL")"
 exec $SHELL -l
-mamba --version || true
-conda --version
+```
+```bash
+mamba --version
 ```
 
-If `mamba` isn’t present after installing Miniforge, add it with:
+If `mamba` isn’t present after installing **Miniforge**, add it with:
 ```bash
 conda install -n base -c conda-forge mamba
 ```
 
-#### Option B) [Alternatively] Install Miniforge from the command line.
+### Option A) Install Miniforge from the command line.
 #### macOS (Apple Silicon / arm64)
 ```bash
 curl -L -o "$HOME/Miniforge3-MacOSX-arm64.sh" \
@@ -121,11 +133,13 @@ Start-Process -Wait $inst
 mamba --version || true
 conda --version
 ```
+
+### Option B) [Alternatively] Grab the installer for your OS from the [Miniforge releases page](https://conda-forge.org/miniforge/) and run it.
 ---
 
 ## Quick Start
 
-### Systemic Simulation (Recommended for reproducibility)
+### Multi-Shot (Systemic) Simulation
 For simulating one or multiple systems with a single command. 
 > All systems and simulation parameters are specified in a `.yml` file.
 ```bash
