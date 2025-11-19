@@ -230,6 +230,7 @@ systems:
 ---
 
 ## Simulation Parameters
+Simulation parameters are specified in a `.yml` file.
 ### Minimal `.yml` Reference 
 
 ```yaml
