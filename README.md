@@ -1,4 +1,4 @@
-# FastMDSimulation
+![FastMDAnalysis](assets/fastmdsimulation_banner.png)
 
 [![Tests](https://github.com/aai-research-lab/FastMDSimulation/actions/workflows/tests.yml/badge.svg)](https://github.com/aai-research-lab/FastMDSimulation/actions)
 [![codecov](https://codecov.io/gh/aai-research-lab/FastMDSimulation/branch/main/graph/badge.svg)](https://codecov.io/gh/aai-research-lab/FastMDSimulation)
