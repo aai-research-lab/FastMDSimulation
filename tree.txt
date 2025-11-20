@@ -1,19 +1,19 @@
 FastMDSimulation/                              # repo root
 ├── .gitignore                                 # ignore caches, envs, build artifacts, *_output, simulate_output, analyze_output
 ├── LICENSE                                    # MIT license
-├── README.md                                  # install (Miniforge), CPU/GPU/HPC envs, CLI/API, dry-run, logging, inputs/, formats
+├── README.md                                  
 ├── environment.yml                            # conda env (CPU/HPC modules): python, openmm, openmmforcefields, mdtraj, pdbfixer, rich
-├── environment.gpu.yml                        # conda env (local NVIDIA GPU): adds cudatoolkit matching OpenMM
+├── environment.gpu.yml                        # [obsolete] conda env (local NVIDIA GPU): adds cudatoolkit matching OpenMM
 ├── pyproject.toml                             # package metadata + entry point (fastmds)
 ├── docs/
-│   └── quickstart.md                          # quick start guide (CLI/API, dry-run, logging, examples)
+│   └── quickstart.md                          # quick start guide 
 ├── examples/
-│   ├── trp_cage/
-│   │   ├── trp_cage.pdb                       # example protein
-│   │   └── config.quick.yml                   # short NVT/NPT/prod demo config
+│   ├── trpcage/
+│   │   ├── trpcage.pdb                       # example protein
+│   │   └── config_trpcage.yml                # short NVT/NPT/prod demo config
 │   ├── waterbox/
 │   │   ├── inputs/
-│   │   │   └── water_3nm.pdb                  # placeholder PDB for example runs
+│   │   │   └── waterbox2nm.pdb                # 2nm water box PDB for example runs
 │   │   └── job.yml                            # example job spec (CHARMM36; NVT/NPT/production durations)
 │   ├── pbs_options.yml                        # PBS options (queue, walltime, GPUs, analyze job)
 │   └── slurm_options.yml                      # SLURM options (partition, time, GPUs, analyze job)
@@ -24,7 +24,7 @@ FastMDSimulation/                              # repo root
 │   └── fastmdsimulation/                      # python package
 │       ├── __init__.py                        # exports FastMDSimulation
 │       ├── api.py                             # Python API (constructor accepts PDB or job.yml; simulate(...))
-│       ├── cli.py                             # CLI (fastmds): single 'simulate' entry; --dry-run; --analyze; FASTMDS_LOG_STYLE + defaults.log_style
+│       ├── cli.py                             # CLI (fastmds): single 'simulate' entry; --dry-run; --analyze
 │       ├── core/
 │       │   ├── __init__.py                    # package marker
 │       │   ├── orchestrator.py                # load YAML → PDBFixer for PDB inputs → expand runs → dispatch build/run + inputs/ archive + meta.json
