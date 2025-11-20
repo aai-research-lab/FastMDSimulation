@@ -81,7 +81,7 @@ conda activate fastmdsimulation
 ---
 
 ## Mamba Installation 
-If you don't have `mamba`, we recommend installing **Miniforge**. Please see **options A or B** below.
+If you don't have `mamba`, we recommend installing **Miniforge**. Please see **option A or option B** below.
 
 After installing **Miniforge**, initialize your shell
 ```bash
