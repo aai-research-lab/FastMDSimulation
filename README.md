@@ -324,8 +324,8 @@ stages:
 
 systems:
   - id: trpcage1
-    pdb: trpcage.pdb                     # raw PDB → PDBFixer (strict) → _build/trpcage2_fixed.pdb
-    # fixed_pdb: path/to/already_fixed.pdb  # use this to skip PDBFixer
+    pdb: trpcage.pdb                     # raw PDB → PDBFixer → _build/trpcage1_fixed.pdb
+#   fixed_pdb: already_fixed.pdb         # use this to skip PDBFixer
   - id: trpcage2
     pdb: trpcage.pdb
 
