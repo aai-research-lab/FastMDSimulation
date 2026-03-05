@@ -1,9 +1,18 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from openmm.app import AmberPrmtopFile, CharmmPsfFile, ForceField, GromacsTopFile
 
-from fastmdsimulation.engines.openmm_engine import (
+# flake8 E402: allow import guard before heavy deps
+pytest.importorskip("openmm")
+
+from openmm.app import (  # noqa: E402
+    AmberPrmtopFile,
+    CharmmPsfFile,
+    ForceField,
+    GromacsTopFile,
+)
+
+from fastmdsimulation.engines.openmm_engine import (  # noqa: E402
     build_simulation_from_spec,
     create_system,
 )

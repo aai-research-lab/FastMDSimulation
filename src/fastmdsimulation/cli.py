@@ -67,7 +67,9 @@ def _detect_log_style(system_path: str, config_path: str | None) -> str:
     return style or "pretty"
 
 
-def _resolve_plan_from_pdb(pdb: str, outdir: str, config: str | None):
+def _resolve_plan_from_pdb(
+    pdb: str, outdir: str, config: str | None, overrides: dict | None = None
+):
     """
     Build a synthetic plan for dry-run when the user provides a PDB.
     This doesn't actually run PDBFixer; it's just to print the plan.
@@ -77,6 +79,8 @@ def _resolve_plan_from_pdb(pdb: str, outdir: str, config: str | None):
     if config:
         over = yaml.safe_load(open(config)) or {}
         auto_cfg = _deep_update(auto_cfg, over)
+    if overrides:
+        auto_cfg = _deep_update(auto_cfg, overrides)
 
     # No redundant forcefield under systems; inherits from defaults
     yml_like = {
@@ -171,10 +175,39 @@ def main():
         help="Include slides (default True)",
     )
     p_sim.add_argument(
+        "--plumed",
+        default=None,
+        help="Path to a PLUMED input file to apply to all stages (unless overridden in YAML)",
+    )
+    p_sim.add_argument(
+        "--plumed-log-frequency",
+        type=int,
+        default=None,
+        help="PLUMED log/reporting frequency (steps); defaults to 100 if not set",
+    )
+    p_sim.add_argument(
         "--dry-run",
         action="store_true",
         help="Print resolved plan (stages, durations, output dirs) and exit. "
         "If --analyze is set, also print the exact fastmda analyze command(s).",
+    )
+    # Ligand helpers (protein–ligand one-shot)
+    p_sim.add_argument(
+        "--ligand",
+        default=None,
+        help="Ligand structure file (SDF or MOL2) for OpenFF Sage 2.x ligand parameterization",
+    )
+    p_sim.add_argument(
+        "--ligand-charge",
+        type=int,
+        default=None,
+        help="Net ligand charge (default 0)",
+    )
+    p_sim.add_argument(
+        "--ligand-name",
+        type=str,
+        default="LIG",
+        help="Ligand residue name (default LIG)",
     )
 
     args = parser.parse_args()
@@ -195,11 +228,36 @@ def main():
     if args.cmd == "simulate":
         system = args.system
 
+        plumed_cfg = None
+        if args.plumed or args.plumed_log_frequency is not None:
+            plumed_cfg = {"enabled": True}
+            if args.plumed:
+                plumed_cfg["script"] = args.plumed
+            if args.plumed_log_frequency is not None:
+                plumed_cfg["log_frequency"] = int(args.plumed_log_frequency)
+        overrides = {"defaults": {"plumed": plumed_cfg}} if plumed_cfg else None
+
+        if args.ligand:
+            lig_override = {
+                "systems": [
+                    {
+                        "ligand": args.ligand,
+                        "ligand_charge": args.ligand_charge,
+                        "ligand_name": args.ligand_name,
+                    }
+                ]
+            }
+            overrides = _deep_update(overrides or {}, lig_override)
+
         # Systemic Simulation path (YAML-driven)
         if system.lower().endswith((".yml", ".yaml")):
             if args.config:
                 print(
                     "Warning: --config is ignored for Systemic Simulations (YAML files)."
+                )
+            if args.ligand:
+                print(
+                    "Warning: --ligand flags are ignored for Systemic Simulations; set ligand fields inside the YAML systems[]."
                 )
             if args.dry_run:
                 plan = resolve_plan(system, args.output)
@@ -214,6 +272,12 @@ def main():
                         else ""
                     )
                 )
+                if overrides and overrides.get("defaults", {}).get("plumed"):
+                    pcfg = overrides["defaults"]["plumed"]
+                    desc = pcfg.get("script") or "(no script set)"
+                    print(
+                        f"PLUMED: enabled | script={desc} | log_frequency={pcfg.get('log_frequency', 100)}"
+                    )
                 for r in plan["runs"]:
                     print(
                         f'- Run: {r["system_id"]} @ {r["temperature_K"]} K -> {r["run_dir"]}'
@@ -233,12 +297,17 @@ def main():
                         )
                         print("    → fastmda command:", " ".join(map(str, cmd)))
                 return
-            project_dir = run_from_yaml(system, args.output)
+            if overrides:
+                project_dir = run_from_yaml(system, args.output, overrides=overrides)
+            else:
+                project_dir = run_from_yaml(system, args.output)
 
         # One-Shot Simulation path (PDB-driven)
         else:
             if args.dry_run:
-                plan = _resolve_plan_from_pdb(system, args.output, args.config)
+                plan = _resolve_plan_from_pdb(
+                    system, args.output, args.config, overrides
+                )
                 print("=== DRY RUN (ONE-SHOT SIMULATION) ===")
                 print(f'Project: {plan["project"]}')
                 print(f'Output:  {plan["output_dir"]}')
@@ -250,6 +319,12 @@ def main():
                         else ""
                     )
                 )
+                if overrides and overrides.get("defaults", {}).get("plumed"):
+                    pcfg = overrides["defaults"]["plumed"]
+                    desc = pcfg.get("script") or "(no script set)"
+                    print(
+                        f"PLUMED: enabled | script={desc} | log_frequency={pcfg.get('log_frequency', 100)}"
+                    )
                 for r in plan["runs"]:
                     print(
                         f'- Run: {r["system_id"]} @ {r["temperature_K"]} K -> {r["run_dir"]}'
@@ -269,9 +344,13 @@ def main():
                         )
                         print("    → fastmda command:", " ".join(map(str, cmd)))
                 return
-            project_dir = simulate_from_pdb(
-                system, outdir=args.output, config=args.config
-            )
+            kwargs = {
+                "outdir": args.output,
+                "config": args.config,
+            }
+            if overrides:
+                kwargs["overrides"] = overrides
+            project_dir = simulate_from_pdb(system, **kwargs)
 
         # Attach file logger (plain ISO for audits) and optionally run analysis
         attach_file_logger(str(Path(project_dir) / "fastmds.log"), style="plain")

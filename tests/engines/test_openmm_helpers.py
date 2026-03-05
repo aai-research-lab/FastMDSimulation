@@ -1,7 +1,11 @@
 from unittest.mock import Mock, patch
 
 import pytest
-from openmm.app import (
+
+# flake8 E402: allow import guard before heavy deps
+pytest.importorskip("openmm")
+
+from openmm.app import (  # noqa: E402
     PME,
     AllBonds,
     CutoffNonPeriodic,
@@ -12,7 +16,7 @@ from openmm.app import (
     NoCutoff,
 )
 
-from fastmdsimulation.engines.openmm_engine import (
+from fastmdsimulation.engines.openmm_engine import (  # noqa: E402
     _constraints_from_str,
     _create_system_kwargs,
     _get_minimize_tolerance,

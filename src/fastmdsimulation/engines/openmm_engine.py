@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
 from ..utils.logging import get_logger
+from .plumed_support import merge_plumed_configs, setup_plumed_force
 
 logger = get_logger("engine.openmm")
 
@@ -407,6 +408,98 @@ def _build_simulation(pdb_path: Path, defaults: Dict[str, Any], run_dir: Path):
     return sim
 
 
+def _build_protein_ligand_simulation(
+    spec: Dict[str, Any], defaults: Dict[str, Any], run_dir: Path
+):
+    from openmm import unit
+    from openmm.app import Modeller, PDBFile
+    from openmmforcefields.generators import SystemGenerator
+
+    try:
+        from openff.toolkit.topology import Molecule
+    except Exception as exc:
+        raise RuntimeError(
+            "OpenFF Toolkit is required for protein-ligand simulations. "
+            "Install openff-toolkit in the active environment."
+        ) from exc
+
+    protein_pdb = Path(spec["pdb"])
+    ligand_file = Path(spec["ligand"])
+    ext = ligand_file.suffix.lower()
+    if ext not in (".sdf", ".mol2"):
+        raise ValueError(f"Unsupported ligand format: {ligand_file}. Use SDF or MOL2.")
+
+    ligand_mol = Molecule.from_file(str(ligand_file), file_format=ext.lstrip("."))
+    if not ligand_mol.conformers:
+        ligand_mol.generate_conformers(n_conformers=1)
+    ligand_mol.name = str(spec.get("ligand_name") or ligand_mol.name or "LIG")
+
+    ff_files = (
+        spec.get("forcefield")
+        or defaults.get("forcefield")
+        or [
+            "amber14/protein.ff14SB.xml",
+            "amber14/tip3p.xml",
+        ]
+    )
+    ligand_ff = str(spec.get("ligand_forcefield", "openff-2.2.1"))
+    platform_name = defaults.get("platform", "auto")
+    platform_props = defaults.get("platform_properties", {})
+    padding_nm = float(spec.get("box_padding_nm", defaults.get("box_padding_nm", 1.0)))
+    ionic_strength = float(
+        spec.get("ionic_strength_molar", defaults.get("ionic_strength_molar", 0.15))
+    )
+    neutralize = bool(spec.get("neutralize", defaults.get("neutralize", True)))
+    positiveIon, negativeIon = _parse_ions(defaults)
+
+    protein = PDBFile(str(protein_pdb))
+    modeller = Modeller(protein.topology, protein.positions)
+    modeller.add(ligand_mol.to_topology().to_openmm(), ligand_mol.conformers[0])
+
+    cs_kwargs = _create_system_kwargs(defaults)
+    if "constraints" not in cs_kwargs:
+        cs_kwargs["constraints"] = _constraints_from_str(
+            defaults.get("constraints", "HBonds")
+        )
+    public_cs_kwargs = {k: v for k, v in cs_kwargs.items() if not k.startswith("_")}
+
+    system_generator = SystemGenerator(
+        forcefields=list(ff_files),
+        small_molecule_forcefield=ligand_ff,
+        molecules=[ligand_mol],
+        forcefield_kwargs=public_cs_kwargs,
+    )
+
+    logger.info(
+        f"Solvate protein-ligand: TIP3P  pad={padding_nm} nm  ionic={ionic_strength} M  "
+        f"neutralize={neutralize}  ions=({positiveIon},{negativeIon})"
+    )
+    modeller.addSolvent(
+        system_generator.forcefield,
+        model="tip3p",
+        padding=padding_nm * unit.nanometer,
+        ionicStrength=ionic_strength * unit.molar,
+        positiveIon=positiveIon,
+        negativeIon=negativeIon,
+        neutralize=neutralize,
+    )
+
+    system = system_generator.create_system(modeller.topology, molecules=[ligand_mol])
+    if cs_kwargs.get("_removeCMMotion"):
+        from openmm import CMMotionRemover
+
+        system.addForce(CMMotionRemover())
+
+    integrator = _make_integrator(defaults)
+    sim = _new_simulation(
+        modeller.topology, system, integrator, platform_name, platform_props
+    )
+    sim.context.setPositions(modeller.positions)
+
+    _save_topology_snapshot(sim, run_dir / "topology.pdb")
+    return sim
+
+
 # ------------------------------------------------------------
 # AMBER / GROMACS / CHARMM routes (parameterized)
 # ------------------------------------------------------------
@@ -577,6 +670,8 @@ def build_simulation_from_spec(
 
     if stype == "pdb":
         return _build_simulation(Path(spec["pdb"]), defaults, run_dir)
+    if stype == "pdb_ligand":
+        return _build_protein_ligand_simulation(spec, defaults, run_dir)
     if stype == "amber":
         return _build_from_amber(spec, defaults, run_dir)
     if stype == "gromacs":
@@ -631,11 +726,19 @@ def run_stage(sim, stage: Dict[str, Any], stage_dir: Path, defaults: Dict[str, A
         CheckpointReporter(str(stage_dir / "state.chk"), checkpoint_interval)
     )
 
+    # Setup PLUMED if configured
+    plumed_config = merge_plumed_configs(defaults, stage)
+    plumed_force = setup_plumed_force(sim, plumed_config, stage_dir)
+
     # reset/add barostat as needed
     for idx in reversed(range(sim.system.getNumForces())):
         if sim.system.getForce(idx).__class__.__name__ == "MonteCarloBarostat":
             sim.system.removeForce(idx)
     _maybe_barostat(sim.system, ensemble, temperature_K, pressure_atm)
+
+    # Re-initialize context if PLUMED was added
+    if plumed_force is not None:
+        sim.context.reinitialize(preserveState=True)
 
     if name.lower() == "minimize":
         tol_q, tol_val = _get_minimize_tolerance(defaults)

@@ -22,9 +22,22 @@ except Exception:
 
 from ..engines.openmm_engine import build_simulation_from_spec, run_stage
 from ..utils.logging import attach_file_logger, get_logger
+from .ligand import prepare_protein_ligand_inputs
 from .pdbfix import fix_pdb_with_pdbfixer  # strict fixer (no circular import)
 
 logger = get_logger("orchestrator")
+
+
+def _deep_update(dst: Dict[str, Any], src: Dict[str, Any] | None) -> Dict[str, Any]:
+    """Recursively merge src into dst (in-place) for lightweight overrides."""
+    if not src:
+        return dst
+    for k, v in src.items():
+        if isinstance(v, dict) and isinstance(dst.get(k), dict):
+            _deep_update(dst[k], v)
+        else:
+            dst[k] = v
+    return dst
 
 
 def sha256_file(path: Path) -> str:
@@ -102,6 +115,8 @@ def write_example_config(path: str) -> None:
 # Detection & preparation
 # ------------------------------
 def _detect_system_type(sys_cfg: Dict[str, Any]) -> str:
+    if ("fixed_pdb" in sys_cfg or "pdb" in sys_cfg) and "ligand" in sys_cfg:
+        return "pdb_ligand"
     if "fixed_pdb" in sys_cfg or "pdb" in sys_cfg:
         return "pdb"
     if "prmtop" in sys_cfg and ("inpcrd" in sys_cfg or "rst7" in sys_cfg):
@@ -136,23 +151,61 @@ def _prepare_systems(cfg: Dict[str, Any], base: Path) -> Dict[str, Any]:
         stype = _detect_system_type(s)
         s["type"] = stype
 
-        if stype == "pdb":
+        if stype in ("pdb", "pdb_ligand"):
             system_id = s.get("id") or Path(s.get("pdb") or s.get("fixed_pdb")).stem
             # per-system pH overrides defaults if provided
             ph = float(s.get("ph", default_ph))
 
-            if "fixed_pdb" in s and s["fixed_pdb"]:
-                used = Path(s["fixed_pdb"]).expanduser().resolve()
-                s["pdb"] = str(used)  # normalize downstream to always use 'pdb'
-                # keep user-declared source_pdb if any
+            # Ligand-bearing path: prepare normalized inputs for OpenMM/OpenFF
+            if stype == "pdb_ligand":
+                ligand = Path(s["ligand"]).expanduser().resolve()
+                ligand_charge = s.get("ligand_charge")
+                ligand_name = s.get("ligand_name", "LIG")
+                keep_heterogens = bool(s.get("keep_heterogens", False))
+                keep_water = bool(s.get("keep_water", False))
+
+                prepared = prepare_protein_ligand_inputs(
+                    s.get("pdb") or s.get("fixed_pdb"),
+                    str(ligand),
+                    str(build_dir),
+                    ph=ph,
+                    net_charge=ligand_charge,
+                    ligand_name=ligand_name,
+                    keep_heterogens=keep_heterogens,
+                    keep_water=keep_water,
+                )
+
+                s.update(
+                    {
+                        "type": "pdb_ligand",
+                        "pdb": prepared["pdb"],
+                        "ligand": prepared["ligand"],
+                        "ligand_name": prepared["ligand_name"],
+                        "ligand_forcefield": prepared["ligand_forcefield"],
+                        "forcefield": [
+                            "amber14/protein.ff14SB.xml",
+                            "amber14/tip3p.xml",
+                        ],
+                        "source_pdb": s.get("pdb") or s.get("fixed_pdb"),
+                        "source_ligand": str(ligand),
+                    }
+                )
+
             else:
-                in_pdb = Path(s["pdb"]).expanduser().resolve()
-                fixed_path = build_dir / f"{Path(system_id).stem}_fixed.pdb"
-                # Strict PDBFixer — raises on failure
-                fix_pdb_with_pdbfixer(str(in_pdb), str(fixed_path), ph=ph)
-                s["source_pdb"] = str(in_pdb)
-                s["pdb"] = str(fixed_path)
-                s["fixed_pdb"] = str(fixed_path)  # record where the fixed file lives
+                if "fixed_pdb" in s and s["fixed_pdb"]:
+                    used = Path(s["fixed_pdb"]).expanduser().resolve()
+                    s["pdb"] = str(used)  # normalize downstream to always use 'pdb'
+                    # keep user-declared source_pdb if any
+                else:
+                    in_pdb = Path(s["pdb"]).expanduser().resolve()
+                    fixed_path = build_dir / f"{Path(system_id).stem}_fixed.pdb"
+                    # Strict PDBFixer — raises on failure
+                    fix_pdb_with_pdbfixer(str(in_pdb), str(fixed_path), ph=ph)
+                    s["source_pdb"] = str(in_pdb)
+                    s["pdb"] = str(fixed_path)
+                    s["fixed_pdb"] = str(
+                        fixed_path
+                    )  # record where the fixed file lives
 
         # amber/gromacs/charmm: pass-through
         new_systems.append(s)
@@ -174,19 +227,19 @@ def _expand_runs(cfg: Dict[str, Any], outdir: str) -> Dict[str, Any]:
     runs = []
     for sys_cfg in cfg["systems"]:
         for T in temps:
-            sim_id = f'{sys_cfg.get("id","system")}_T{T}'
+            sim_id = f'{sys_cfg.get("id", "system")}_T{T}'
             simdir = base / sim_id
             run = {
                 "system_id": sys_cfg.get("id", "system"),
                 "temperature_K": T,
-                "run_dir": str(simdir),
+                "run_dir": simdir.as_posix(),
                 "stages": cfg["stages"],
                 "input": sys_cfg,  # full spec (type + files)
             }
             if "forcefield" in sys_cfg:
                 run["forcefield"] = sys_cfg["forcefield"]
             runs.append(run)
-    return {"project": project, "output_dir": str(base), "runs": runs}
+    return {"project": project, "output_dir": base.as_posix(), "runs": runs}
 
 
 def _steps_to_ps(steps: int, timestep_fs: float) -> float:
@@ -194,7 +247,7 @@ def _steps_to_ps(steps: int, timestep_fs: float) -> float:
 
 
 def resolve_plan(config_path: str, outdir: str) -> Dict[str, Any]:
-    cfg = yaml.safe_load(open(config_path))
+    cfg = yaml.safe_load(Path(config_path).read_text())
     plan = _expand_runs(cfg, outdir)
     tfs = float(cfg.get("defaults", {}).get("timestep_fs", 2.0))
     enriched = []
@@ -260,6 +313,10 @@ def _collect_system_paths(sys_cfg: Dict[str, Any]) -> List[Path]:
             paths.append(Path(sys_cfg["source_pdb"]))
         if sys_cfg.get("fixed_pdb"):
             paths.append(Path(sys_cfg["fixed_pdb"]))
+    elif stype == "pdb_ligand":
+        for k in ("pdb", "source_pdb", "fixed_pdb", "ligand", "source_ligand"):
+            if sys_cfg.get(k):
+                paths.append(Path(sys_cfg[k]))
     elif stype == "amber":
         for k in ("prmtop", "inpcrd", "rst7"):
             if sys_cfg.get(k):
@@ -307,9 +364,13 @@ def _populate_inputs(cfg: Dict[str, Any], cfg_path: Path, base: Path) -> None:
 # ------------------------------
 # Run
 # ------------------------------
-def run_from_yaml(config_path: str, outdir: str) -> str:
+def run_from_yaml(
+    config_path: str, outdir: str, overrides: Dict[str, Any] | None = None
+) -> str:
     cfg_path = Path(config_path)
     cfg = yaml.safe_load(open(cfg_path))
+    if overrides:
+        cfg = _deep_update(cfg, overrides)
     project = cfg["project"]
     defaults = cfg.get("defaults", {})
     base = Path(outdir) / project

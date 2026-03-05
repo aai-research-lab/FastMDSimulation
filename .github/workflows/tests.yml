@@ -19,7 +19,7 @@ jobs:
       uses: mamba-org/setup-micromamba@v1
       with:
         environment-file: environment.yml
-        cache-environment: true
+        cache-environment: false 
         init-shell: bash
     
     - name: Install package and test dependencies
@@ -65,7 +65,7 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment.yml
-          cache-environment: true
+          cache-environment: false
           init-shell: bash
       
       - name: Install linting dependencies
@@ -94,7 +94,7 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment.yml
-          cache-environment: true
+          cache-environment: false
           init-shell: bash
       
       - name: Install package
@@ -132,7 +132,7 @@ jobs:
         uses: mamba-org/setup-micromamba@v1
         with:
           environment-file: environment.yml
-          cache-environment: true
+          cache-environment: false
           init-shell: bash
       
       - name: Install package
@@ -146,6 +146,6 @@ jobs:
           fastmds simulate -system examples/waterbox/job.yml --dry-run
           
           # Test one-shot simulation dry-run  
-          fastmds simulate -system examples/trpcage/trpcage.pdb --config examples/config.quick.yml --dry-run
+          fastmds simulate -system examples/trpcage/trpcage.pdb --config examples/config_quick.yml --dry-run
           
           echo "All dry-run tests passed"

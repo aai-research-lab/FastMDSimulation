@@ -1,0 +1,10 @@
+{# Custom brand to show only the banner and link to the overview #}
+{% if logo_url %}
+  <a class="sidebar-brand" href="{{ pathto(master_doc) }}">
+    <img class="sidebar-logo" src="{{ logo_url }}" alt="{{ project }} logo" />
+  </a>
+{% else %}
+  <a class="sidebar-brand" href="{{ pathto(master_doc) }}">
+    <span class="sidebar-brand-text">{{ project }}</span>
+  </a>
+{% endif %}

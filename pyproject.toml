@@ -29,6 +29,12 @@ tests = [
 analysis = [
     "fastmdanalysis>=1.0.0"
 ]
+docs = [
+    "sphinx>=7",
+    "myst-parser>=3",
+    "furo>=2024.0.0",
+    "sphinx-autodoc-typehints>=2",
+]
 
 [project.scripts]
 fastmds = "fastmdsimulation.cli:main"

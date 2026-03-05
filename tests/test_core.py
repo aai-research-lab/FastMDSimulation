@@ -31,9 +31,7 @@ class TestOrchestrator:
 
         # Create job YAML using fixed_pdb (should skip PDBFixer)
         job_yml = tmp_path / "fixed_pdb_job.yml"
-        job_yml.write_text(
-            textwrap.dedent(
-                f"""
+        job_yml.write_text(textwrap.dedent(f"""
             project: WaterBox
             defaults:
                 engine: openmm
@@ -43,9 +41,7 @@ class TestOrchestrator:
             systems:
                 - id: water_system
                   fixed_pdb: {water2nm_pdb.as_posix()}
-        """
-            )
-        )
+        """))
 
         # Mock the actual execution to avoid running simulations
         def mock_run_from_yaml(config_path, outdir):
@@ -69,9 +65,7 @@ class TestOrchestrator:
         """Test that raw PDB inputs are processed correctly."""
         # Create job YAML using raw PDB
         job_yml = tmp_path / "raw_pdb_job.yml"
-        job_yml.write_text(
-            textwrap.dedent(
-                f"""
+        job_yml.write_text(textwrap.dedent(f"""
             project: TestProtein
             defaults:
                 engine: openmm
@@ -80,9 +74,7 @@ class TestOrchestrator:
             systems:
                 - id: protein_system
                   pdb: {sample_pdb_file.as_posix()}
-        """
-            )
-        )
+        """))
 
         # Mock the execution to avoid running real simulations
         def mock_run_from_yaml(config_path, outdir):
@@ -102,15 +94,11 @@ class TestPDBFixerIntegration:
     def test_fix_pdb_with_pdbfixer_rejects_placeholder_pdb(self, tmp_path):
         """Test that PDBFixer properly rejects invalid/placeholder PDB files."""
         placeholder_pdb = tmp_path / "placeholder.pdb"
-        placeholder_pdb.write_text(
-            textwrap.dedent(
-                """
+        placeholder_pdb.write_text(textwrap.dedent("""
             HEADER PLACEHOLDER_STRUCTURE
             REMARK This is not a real PDB file
             END
-        """
-            )
-        )
+        """))
 
         output_pdb = tmp_path / "fixed.pdb"
 

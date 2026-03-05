@@ -157,7 +157,9 @@ class TestCLIMain:
         ):
             main()
 
-        mock_resolve_plan.assert_called_once_with("test.pdb", "simulate_output", None)
+        mock_resolve_plan.assert_called_once_with(
+            "test.pdb", "simulate_output", None, None
+        )
 
     @patch("fastmdsimulation.cli.setup_console")
     @patch("fastmdsimulation.cli.simulate_from_pdb")
@@ -190,10 +192,49 @@ class TestCLIMain:
             main()
 
         mock_simulate_pdb.assert_called_once_with(
-            "test.pdb", outdir="simulate_output", config="config.yaml"
+            "test.pdb",
+            outdir="simulate_output",
+            config="config.yaml",
         )
         mock_analyze.assert_called_once_with(
             "/tmp/project", slides=False, frames="0,10", atoms="backbone"
+        )
+
+    @patch("fastmdsimulation.cli.setup_console")
+    @patch("fastmdsimulation.cli.simulate_from_pdb")
+    def test_main_simulate_pdb_with_plumed_cli(
+        self, mock_simulate_pdb, mock_setup_console
+    ):
+        mock_simulate_pdb.return_value = "/tmp/project"
+
+        with patch(
+            "sys.argv",
+            [
+                "fastmds",
+                "simulate",
+                "--system",
+                "test.pdb",
+                "--plumed",
+                "bias.dat",
+                "--plumed-log-frequency",
+                "50",
+            ],
+        ):
+            main()
+
+        mock_simulate_pdb.assert_called_once_with(
+            "test.pdb",
+            outdir="simulate_output",
+            config=None,
+            overrides={
+                "defaults": {
+                    "plumed": {
+                        "enabled": True,
+                        "script": "bias.dat",
+                        "log_frequency": 50,
+                    }
+                }
+            },
         )
 
     @patch("fastmdsimulation.cli.setup_console")

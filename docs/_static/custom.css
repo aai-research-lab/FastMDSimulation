@@ -1,0 +1,146 @@
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600&family=Source+Sans+3:wght@400;600&display=swap');
+
+:root {
+  --fms-ink: #0f172a;
+  --fms-ink-soft: #1f2937;
+  --fms-sand: #f8f6f2;
+  --fms-stone: #e9edf2;
+  --fms-teal: #0b7a75;
+  --fms-teal-bright: #1ec9b2;
+  --fms-amber: #f59e0b;
+  --fms-night: #0b1020;
+  --fms-night-soft: #11182b;
+}
+
+[data-theme="light"] {
+  --color-brand-primary: var(--fms-teal);
+  --color-brand-content: var(--fms-teal);
+  --color-background-primary: var(--fms-sand);
+  --color-background-secondary: #ffffff;
+  --color-foreground-primary: var(--fms-ink);
+  --color-foreground-secondary: #374151;
+  --color-muted: #6b7280;
+  --color-background-border: var(--fms-stone);
+}
+
+[data-theme="dark"] {
+  --color-brand-primary: var(--fms-teal-bright);
+  --color-brand-content: var(--fms-teal-bright);
+  --color-background-primary: var(--fms-night);
+  --color-background-secondary: var(--fms-night-soft);
+  --color-foreground-primary: #e5e7eb;
+  --color-foreground-secondary: #cbd5e1;
+  --color-muted: #9ca3af;
+  --color-background-border: #1f2937;
+}
+
+:root[data-theme="light"] body {
+  background-color: var(--color-background-primary);
+  background-image: radial-gradient(circle at 12% 18%, rgba(11, 122, 117, 0.08), transparent 25%),
+    radial-gradient(circle at 82% 0%, rgba(245, 158, 11, 0.08), transparent 28%);
+}
+
+:root[data-theme="dark"] body {
+  background-color: var(--color-background-primary);
+  background-image: radial-gradient(circle at 14% 16%, rgba(30, 201, 178, 0.08), transparent 24%),
+    radial-gradient(circle at 82% 4%, rgba(245, 158, 11, 0.06), transparent 30%);
+}
+
+body {
+  font-family: "Source Sans 3", "Segoe UI", sans-serif;
+}
+
+.furo-article {
+  max-width: 1100px;
+}
+
+article h1,
+article h2,
+article h3,
+article h4 {
+  font-family: "Space Grotesk", "Source Sans 3", "Segoe UI", sans-serif;
+  letter-spacing: -0.01em;
+  color: var(--color-foreground-primary);
+}
+
+a {
+  text-decoration-color: rgba(15, 118, 110, 0.35);
+  text-underline-offset: 0.22em;
+}
+
+a:hover {
+  color: var(--color-brand-content);
+  text-decoration-color: rgba(15, 118, 110, 0.7);
+}
+
+.admonition {
+  border-radius: 12px;
+  border: 1px solid var(--color-background-border);
+  background: #0c7d78;
+  color: #f8fafc;
+}
+
+[data-theme="dark"] .admonition {
+  background: #0c7d78;
+  border-color: rgba(30, 201, 178, 0.35);
+  color: #f8fafc;
+}
+
+.admonition .admonition-title {
+  color: #e0f2f1;
+}
+
+.admonition p,
+.admonition a,
+.admonition code {
+  color: #f8fafc;
+}
+
+.admonition a:hover {
+  color: #e0f2f1;
+}
+
+code {
+  padding: 0.18em 0.4em;
+  border-radius: 6px;
+  background: rgba(11, 122, 117, 0.08);
+}
+
+[data-theme="dark"] code {
+  background: rgba(30, 201, 178, 0.14);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+.fms-footer {
+  padding: 1.25rem 0;
+  margin-top: 1rem;
+  border-top: 1px solid var(--color-background-border);
+  text-align: center;
+}
+
+.fms-footer__text {
+  font-size: 0.95rem;
+  letter-spacing: 0.01em;
+  color: var(--color-foreground-secondary);
+}
+
+/* Sidebar brand tweaks (Furo) */
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 1rem 1rem;
+}
+
+.sidebar-brand-text {
+  display: none;
+}
+
+.sidebar-logo {
+  max-height: 64px;
+  width: auto;
+}

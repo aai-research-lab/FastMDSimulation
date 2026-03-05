@@ -66,32 +66,49 @@ def build_auto_config(fixed_pdb: Path, project: Optional[str] = None) -> Dict[st
 
 
 def simulate_from_pdb(
-    system_pdb: str, outdir: str = "simulate_output", config: Optional[str] = None
+    system_pdb: str,
+    outdir: str = "simulate_output",
+    config: Optional[str] = None,
+    overrides: Optional[Dict[str, Any]] = None,
 ) -> str:
     # Local import to avoid circular import at module import-time
     from .orchestrator import run_from_yaml
 
-    system_pdb = Path(system_pdb).expanduser().resolve()
-    build_dir = Path(outdir) / (_auto_project_name(system_pdb)) / "_build"
+    system_pdb_path = Path(system_pdb).expanduser().resolve()
+    if not system_pdb_path.exists():
+        raise FileNotFoundError(system_pdb)
+
+    # Validate/merge config before touching OpenMM-dependent steps so pure YAML errors
+    # surface without needing OpenMM installed.
+    merged_cfg: Dict[str, Any] | None = None
+    if config:
+        config_path = Path(config).expanduser().resolve()
+        if not config_path.exists():
+            raise FileNotFoundError(config)
+        with open(config_path, "r") as f:
+            over = yaml.safe_load(f) or {}
+        merged_cfg = over
+
+    build_dir = Path(outdir) / (_auto_project_name(system_pdb_path)) / "_build"
     build_dir.mkdir(parents=True, exist_ok=True)
 
-    fixed_pdb = build_dir / f"{system_pdb.stem}_fixed.pdb"
+    fixed_pdb = build_dir / f"{system_pdb_path.stem}_fixed.pdb"
 
-    # STRICT: always fix
-    fix_pdb_with_pdbfixer(str(system_pdb), str(fixed_pdb))
+    # STRICT: always fix (requires OpenMM). This occurs after validating inputs.
+    fix_pdb_with_pdbfixer(str(system_pdb_path), str(fixed_pdb))
 
-    cfg = build_auto_config(fixed_pdb, project=_auto_project_name(system_pdb))
-    # record provenance of the original PDB
-    cfg["systems"][0]["source_pdb"] = str(system_pdb)
+    cfg = build_auto_config(fixed_pdb, project=_auto_project_name(system_pdb_path))
+    cfg["systems"][0]["source_pdb"] = str(system_pdb_path)
 
-    if config:
-        with open(config, "r") as f:
-            over = yaml.safe_load(f) or {}
-        cfg = _deep_update(cfg, over)
+    if merged_cfg is not None:
+        cfg = _deep_update(cfg, merged_cfg)
+
+    if overrides:
+        cfg = _deep_update(cfg, overrides)
 
     auto_yml = build_dir / "job.auto.yml"
     with open(auto_yml, "w") as f:
         yaml.safe_dump(cfg, f, sort_keys=False)
 
-    project_dir = run_from_yaml(str(auto_yml), outdir)
+    project_dir = run_from_yaml(auto_yml.as_posix(), outdir, overrides=None)
     return project_dir

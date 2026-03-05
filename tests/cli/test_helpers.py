@@ -135,12 +135,10 @@ class TestEnvLogStyle:
 class TestDetectLogStyle:
     def test_detect_log_style_yaml_file(self):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(
-                """
+            f.write("""
             defaults:
               log_style: plain
-            """
-            )
+            """)
             temp_path = f.name
 
         try:
@@ -151,12 +149,10 @@ class TestDetectLogStyle:
 
     def test_detect_log_style_pdb_with_config(self):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(
-                """
+            f.write("""
             defaults:
               log_style: plain
-            """
-            )
+            """)
             config_path = f.name
 
         try:
@@ -176,12 +172,10 @@ class TestDetectLogStyle:
 
     def test_detect_log_style_yaml_no_style(self):
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as f:
-            f.write(
-                """
+            f.write("""
             systems:
               - id: test
-            """
-            )
+            """)
             temp_path = f.name
 
         try:

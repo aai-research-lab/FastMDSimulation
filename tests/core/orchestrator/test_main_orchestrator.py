@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
+import fastmdsimulation.core.orchestrator as orch
 from fastmdsimulation.core.orchestrator import run_from_yaml
 
 
@@ -92,6 +93,42 @@ class TestMainOrchestrator:
         # Verify simulation was built and run
         mock_build_sim.assert_called_once()
         mock_run_stage.assert_called_once()
+
+
+@patch("fastmdsimulation.core.orchestrator.prepare_protein_ligand_inputs")
+def test_prepare_systems_with_ligand(mock_prepare_ligand, tmp_path):
+    """PDB+ligand entries should be normalized for OpenFF ligand simulation."""
+
+    mock_prepare_ligand.return_value = {
+        "pdb": "/tmp/protein_fixed.pdb",
+        "ligand": "/tmp/ligand.sdf",
+        "ligand_name": "LIG",
+        "ligand_forcefield": "openff-2.2.1",
+    }
+
+    cfg = {
+        "project": "proj",
+        "defaults": {"box_padding_nm": 1.0, "neutralize": True},
+        "systems": [
+            {
+                "id": "sys1",
+                "pdb": str(tmp_path / "protein.pdb"),
+                "ligand": str(tmp_path / "ligand.sdf"),
+                "ligand_charge": 0,
+                "ligand_name": "LIG",
+            }
+        ],
+        "stages": [],
+    }
+
+    out = orch._prepare_systems(cfg, tmp_path)
+    sys0 = out["systems"][0]
+    assert sys0["type"] == "pdb_ligand"
+    assert sys0["pdb"] == "/tmp/protein_fixed.pdb"
+    assert sys0["ligand"] == "/tmp/ligand.sdf"
+    assert sys0["ligand_forcefield"] == "openff-2.2.1"
+    assert sys0.get("source_ligand") == str(tmp_path / "ligand.sdf")
+    mock_prepare_ligand.assert_called_once()
 
     @patch("fastmdsimulation.core.orchestrator._prepare_systems")
     @patch("fastmdsimulation.core.orchestrator.attach_file_logger")

@@ -1,6 +1,7 @@
 # tests/core/orchestrator/test_config_utils.py
 
 import tempfile
+from pathlib import Path
 
 # from pathlib import Path
 from unittest.mock import patch
@@ -85,11 +86,15 @@ class TestResolvePlan:
             ],
         }
 
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".yml") as f:
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yml", delete=False) as f:
             yaml.dump(mock_config, f)
             f.flush()
+            path = f.name
 
-            result = resolve_plan(f.name, "/tmp/output")
+        try:
+            result = resolve_plan(path, "/tmp/output")
+        finally:
+            Path(path).unlink(missing_ok=True)
 
         # Verify plan structure
         assert result["project"] == "test_project"

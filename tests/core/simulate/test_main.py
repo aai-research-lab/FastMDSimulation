@@ -1,4 +1,5 @@
 # from pathlib import Path
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -189,8 +190,8 @@ class TestSimulateFromPDB:
             ) as mock_run_from_yaml,
         ):
 
-            # Use relative path and home expansion
-            relative_pdb = f"~/../{pdb_file.relative_to(tmp_path.parent)}"
+            # Use a path with tilde that still resolves to the actual file
+            relative_pdb = str(pdb_file).replace(str(Path.home()), "~")
 
             simulate_from_pdb(relative_pdb, outdir=str(tmp_path / "output"))
 

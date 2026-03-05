@@ -9,11 +9,18 @@ from ..utils.logging import get_logger
 logger = get_logger("pdbfix")
 
 
-def fix_pdb_with_pdbfixer(input_pdb: str, output_pdb: str, *, ph: float = 7.0) -> None:
+def fix_pdb_with_pdbfixer(
+    input_pdb: str,
+    output_pdb: str,
+    *,
+    ph: float = 7.0,
+    keep_heterogens: bool = False,
+    keep_water: bool = False,
+) -> None:
     """
     Strict PDBFixer wrapper: raises on failure.
-    - Removes heterogens (keeps no waters), finds/adds missing residues/atoms,
-      adds hydrogens at the requested pH.
+    - By default removes heterogens (and waters); set keep_heterogens/keep_water to retain them.
+    - Repairs missing residues/atoms and adds hydrogens at the requested pH.
     """
     from openmm.app import PDBFile
     from pdbfixer import PDBFixer
@@ -22,7 +29,8 @@ def fix_pdb_with_pdbfixer(input_pdb: str, output_pdb: str, *, ph: float = 7.0) -
     out = Path(output_pdb)
     logger.info(f"Fixing PDB with PDBFixer: {inp} (pH={ph})")
     fixer = PDBFixer(filename=str(inp))
-    fixer.removeHeterogens(keepWater=False)
+    if not keep_heterogens:
+        fixer.removeHeterogens(keepWater=keep_water)
     fixer.findMissingResidues()
     fixer.findMissingAtoms()
     fixer.addMissingAtoms()

@@ -3,7 +3,6 @@ FastMDSimulation/                              # repo root
 ├── LICENSE                                    # MIT license
 ├── README.md                                  
 ├── environment.yml                            # conda env (CPU/HPC modules): python, openmm, openmmforcefields, mdtraj, pdbfixer, rich
-├── environment.gpu.yml                        # [obsolete] conda env (local NVIDIA GPU): adds cudatoolkit matching OpenMM
 ├── pyproject.toml                             # package metadata + entry point (fastmds)
 ├── docs/
 │   └── quickstart.md                          # quick start guide 
