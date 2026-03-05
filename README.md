@@ -488,7 +488,7 @@ Aina, A. (2026) "FastMDSimulation: Software for Automated Molecular Dynamics Sim
 ```bibtex
 @software{fastmdsimulation,
  author       = {Adekunle Aina, Oliche Brown, Derrick Kwan},
-  title        = {FastMDSimulation: Software for Automated Molecular Dynamics Analysis},
+  title        = {FastMDSimulation: Software for Automated Molecular Dynamics Simulation},
   year         = {2025},
   publisher    = {Zenodo},
   doi          = {10.5281/zenodo.17664277},
